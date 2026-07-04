@@ -22,6 +22,7 @@ struct HomeView: View {
             return "Good Evening"
         }
     }
+
     var headerSection: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
@@ -31,18 +32,18 @@ struct HomeView: View {
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
                     .fixedSize(horizontal: false, vertical: true)
-                
+
                 Text(greetingSubtitle)
                     .font(AppTheme.Typography.kanaReading)
                     .foregroundStyle(AppTheme.Colors.secondaryText)
             }
-            
+
             Spacer()
-            
+
             SealStamp(text: "覚える")
         }
     }
-    
+
     var streakSection: some View {
         HStack(spacing: AppTheme.Spacing.md) {
             VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
@@ -51,28 +52,29 @@ struct HomeView: View {
                     .foregroundStyle(AppTheme.Colors.tertiaryText)
                     .textCase(.uppercase)
                     .tracking(1.2)
-                
+
                 HStack(alignment: .firstTextBaseline,
                        spacing: AppTheme.Spacing.xs) {
                     Text("0")
                         .font(AppTheme.Typography.streakNumber)
                         .foregroundStyle(AppTheme.Colors.vermillion)
-                    
+
                     Text("days")
                         .font(AppTheme.Typography.meaning)
                         .foregroundStyle(AppTheme.Colors.secondaryText)
                 }
             }
-            
+
             Spacer()
-            
-            Text("🔥")
-                .font(.system(size: 44))
+
+            Text("続")
+                .font(.system(size: 36, weight: .bold, design: .serif))
+                .foregroundStyle(AppTheme.Colors.vermillion)
         }
         .padding(AppTheme.Spacing.lg)
         .oboeruCard()
     }
-    
+
     var todaySection: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             HStack {
@@ -83,7 +85,7 @@ struct HomeView: View {
                     .tracking(1.2)
                 Spacer()
             }
-            
+
             HStack(spacing: AppTheme.Spacing.md) {
                 todayStatCard(
                     value: "0",
@@ -103,7 +105,7 @@ struct HomeView: View {
             }
         }
     }
-    
+
     func todayStatCard(value: String,
                        label: String,
                        color: Color) -> some View {
@@ -111,7 +113,7 @@ struct HomeView: View {
             Text(value)
                 .font(AppTheme.Typography.streakNumber)
                 .foregroundStyle(color)
-            
+
             Text(label)
                 .font(AppTheme.Typography.caption)
                 .foregroundStyle(AppTheme.Colors.tertiaryText)
@@ -122,7 +124,7 @@ struct HomeView: View {
         .padding(.vertical, AppTheme.Spacing.lg)
         .oboeruCard()
     }
-    
+
     var actionButtons: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             Button {
@@ -142,7 +144,7 @@ struct HomeView: View {
                     cornerRadius: AppTheme.Radius.button
                 ))
             }
-            
+
             Button {
             } label: {
                 HStack {
@@ -168,7 +170,7 @@ struct HomeView: View {
             }
         }
     }
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -194,6 +196,7 @@ struct HomeView: View {
         }
     }
 }
+
 #Preview {
     HomeView()
 }
