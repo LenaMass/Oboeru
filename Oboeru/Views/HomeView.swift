@@ -3,22 +3,25 @@ import SwiftUI
 struct HomeView: View {
     var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 5..<12: return "おはよう"
-        case 12..<17: return "こんにちは"
-        default: return "こんばんは"
+        if hour < 12 {
+            return "おはよう"
+        } else if hour < 18 {
+            return "こんにちは"
+        } else {
+            return "こんばんは"
         }
     }
-    
+
     var greetingSubtitle: String {
         let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 5..<12: return "Good Morning"
-        case 12..<17: return "Good Afternoon"
-        default: return "Good Evening"
+        if hour < 12 {
+            return "Good Morning"
+        } else if hour < 18 {
+            return "Good Afternoon"
+        } else {
+            return "Good Evening"
         }
     }
-    
     var headerSection: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
