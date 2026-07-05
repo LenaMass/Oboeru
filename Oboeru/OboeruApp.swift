@@ -1,10 +1,15 @@
 import SwiftUI
 
 @main
-struct OboeruApp: App {
+struct OboeeruApp: App {
+    
+    let persistence = PersistenceController.shared
+    
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .environment(\.managedObjectContext,
+                              persistence.context)
         }
     }
 }

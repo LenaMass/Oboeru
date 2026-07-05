@@ -21,6 +21,7 @@ struct StudyView: View {
             }
             .navigationTitle("Study")
             .navigationBarTitleDisplayMode(.inline)
+            .preferredColorScheme(.light)
             
         }
     }
@@ -91,8 +92,8 @@ struct StudyView: View {
             
             Text("tap to reveal")
                 .font(AppTheme.Typography.cardHint)
-                .foregroundStyle(AppTheme.Colors.tertiaryText)
-                .padding(.bottom, AppTheme.Spacing.md)
+                .foregroundStyle(AppTheme.Colors.vermillion)
+                .padding(.bottom, AppTheme.Spacing.lg)
         }
         .frame(maxWidth: .infinity, maxHeight: 400)
         .padding(AppTheme.Spacing.lg)

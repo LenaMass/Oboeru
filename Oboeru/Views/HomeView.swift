@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct HomeView: View {
+    
+    @StateObject private var deckViewModel = DailyDeckViewModel()
+    
     var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         if hour < 12 {
@@ -11,7 +14,7 @@ struct HomeView: View {
             return "こんばんは"
         }
     }
-
+    
     var greetingSubtitle: String {
         let hour = Calendar.current.component(.hour, from: Date())
         if hour < 12 {
@@ -22,7 +25,30 @@ struct HomeView: View {
             return "Good Evening"
         }
     }
-
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: AppTheme.Spacing.xl) {
+                    headerSection
+                    dailyDeckSection
+                    actionButtons
+                }
+                .padding(.horizontal, AppTheme.Spacing.lg)
+                .padding(.top, AppTheme.Spacing.lg)
+                .padding(.bottom, AppTheme.Spacing.xxl)
+            }
+            .background(
+                Image("HomePageBG")
+                    .resizable()
+                    .scaledToFill()
+                    .opacity(0.4)
+                    .ignoresSafeArea()
+            )
+            .background(AppTheme.Colors.background.ignoresSafeArea())
+        }
+    }
+    
     var headerSection: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
@@ -32,99 +58,157 @@ struct HomeView: View {
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
                     .fixedSize(horizontal: false, vertical: true)
-
+                
                 Text(greetingSubtitle)
                     .font(AppTheme.Typography.kanaReading)
                     .foregroundStyle(AppTheme.Colors.secondaryText)
             }
-
+            
             Spacer()
-
+            
             SealStamp(text: "覚える")
         }
     }
-
-    var streakSection: some View {
-        HStack(spacing: AppTheme.Spacing.md) {
-            VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
-                Text("Current Streak")
-                    .font(AppTheme.Typography.sectionHeader)
-                    .foregroundStyle(AppTheme.Colors.tertiaryText)
-                    .textCase(.uppercase)
-                    .tracking(1.2)
-
-                HStack(alignment: .firstTextBaseline,
-                       spacing: AppTheme.Spacing.xs) {
-                    Text("0")
-                        .font(AppTheme.Typography.streakNumber)
-                        .foregroundStyle(AppTheme.Colors.vermillion)
-
-                    Text("days")
-                        .font(AppTheme.Typography.meaning)
-                        .foregroundStyle(AppTheme.Colors.secondaryText)
-                }
-            }
-
-            Spacer()
-
-            Text("続")
-                .font(.system(size: 36, weight: .bold, design: .serif))
-                .foregroundStyle(AppTheme.Colors.vermillion)
-        }
-        .padding(AppTheme.Spacing.lg)
-        .oboeruCard()
-    }
-
-    var todaySection: some View {
+    
+    var dailyDeckSection: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             HStack {
-                Text("Today")
+                Text("Today's Deck")
                     .font(AppTheme.Typography.sectionHeader)
                     .foregroundStyle(AppTheme.Colors.tertiaryText)
                     .textCase(.uppercase)
                     .tracking(1.2)
                 Spacer()
+                Text("今日")
+                    .font(.system(size: 16,
+                                 weight: .bold,
+                                 design: .serif))
+                    .foregroundStyle(AppTheme.Colors.vermillion)
             }
-
-            HStack(spacing: AppTheme.Spacing.md) {
-                todayStatCard(
-                    value: "0",
-                    label: "Due",
-                    color: AppTheme.Colors.vermillion
-                )
-                todayStatCard(
-                    value: "0",
-                    label: "New",
-                    color: AppTheme.Colors.sageGreen
-                )
-                todayStatCard(
-                    value: "0",
-                    label: "Done",
-                    color: AppTheme.Colors.gold
-                )
+            
+            if deckViewModel.isLoading {
+                loadingCard
+            } else if deckViewModel.isCompleted {
+                completedCard
+            } else if let error = deckViewModel.errorMessage {
+                errorCard(message: error)
+            } else {
+                deckCard
             }
         }
     }
-
-    func todayStatCard(value: String,
-                       label: String,
-                       color: Color) -> some View {
-        VStack(spacing: AppTheme.Spacing.xs) {
-            Text(value)
-                .font(AppTheme.Typography.streakNumber)
-                .foregroundStyle(color)
-
-            Text(label)
-                .font(AppTheme.Typography.caption)
-                .foregroundStyle(AppTheme.Colors.tertiaryText)
-                .textCase(.uppercase)
-                .tracking(1.0)
+    
+    var deckCard: some View {
+        VStack(spacing: AppTheme.Spacing.md) {
+            HStack(spacing: AppTheme.Spacing.md) {
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+                    Text("\(deckViewModel.todaysDeck.count) words ready")
+                        .font(AppTheme.Typography.meaning)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(AppTheme.Colors.primaryText)
+                    
+                    Text("5 vocabulary · 5 kanji words")
+                        .font(AppTheme.Typography.caption)
+                        .foregroundStyle(AppTheme.Colors.tertiaryText)
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 2) {
+                    Text("続")
+                        .font(.system(size: 32,
+                                     weight: .bold,
+                                     design: .serif))
+                        .foregroundStyle(AppTheme.Colors.vermillion)
+                }
+            }
+            
+            HStack(spacing: AppTheme.Spacing.sm) {
+                ForEach(0..<10, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(index < deckViewModel.todaysDeck.count ?
+                              AppTheme.Colors.vermillion :
+                              AppTheme.Colors.border)
+                        .frame(height: 4)
+                }
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, AppTheme.Spacing.lg)
+        .padding(AppTheme.Spacing.lg)
         .oboeruCard()
     }
-
+    
+    var loadingCard: some View {
+        HStack(spacing: AppTheme.Spacing.md) {
+            ProgressView()
+                .tint(AppTheme.Colors.vermillion)
+            
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+                Text("Preparing your deck...")
+                    .font(AppTheme.Typography.meaning)
+                    .foregroundStyle(AppTheme.Colors.primaryText)
+                
+                Text("Fetching today's words from Jisho")
+                    .font(AppTheme.Typography.caption)
+                    .foregroundStyle(AppTheme.Colors.tertiaryText)
+            }
+            
+            Spacer()
+        }
+        .padding(AppTheme.Spacing.lg)
+        .oboeruCard()
+    }
+    
+    var completedCard: some View {
+        VStack(spacing: AppTheme.Spacing.sm) {
+            Text("今日は終わり")
+                .font(.system(size: 28,
+                             weight: .bold,
+                             design: .serif))
+                .foregroundStyle(AppTheme.Colors.sageGreen)
+            
+            Text("You completed today's deck")
+                .font(AppTheme.Typography.meaning)
+                .foregroundStyle(AppTheme.Colors.secondaryText)
+            
+            Text("Come back tomorrow for 10 new words")
+                .font(AppTheme.Typography.caption)
+                .foregroundStyle(AppTheme.Colors.tertiaryText)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(AppTheme.Spacing.xl)
+        .oboeruCard()
+    }
+    
+    func errorCard(message: String) -> some View {
+        VStack(spacing: AppTheme.Spacing.sm) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 32))
+                .foregroundStyle(AppTheme.Colors.vermillion)
+            
+            Text(message)
+                .font(AppTheme.Typography.caption)
+                .foregroundStyle(AppTheme.Colors.tertiaryText)
+                .multilineTextAlignment(.center)
+            
+            Button {
+                deckViewModel.generateNewDeck()
+            } label: {
+                Text("Try Again")
+                    .font(AppTheme.Typography.caption)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, AppTheme.Spacing.lg)
+                    .padding(.vertical, AppTheme.Spacing.sm)
+                    .background(AppTheme.Colors.vermillion)
+                    .clipShape(RoundedRectangle(
+                        cornerRadius: AppTheme.Radius.button
+                    ))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(AppTheme.Spacing.lg)
+        .oboeruCard()
+    }
+    
     var actionButtons: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             Button {
@@ -132,19 +216,22 @@ struct HomeView: View {
                 HStack {
                     Image(systemName: "rectangle.on.rectangle")
                         .font(.system(size: 18, weight: .medium))
-                    Text("Start Studying")
+                    Text(deckViewModel.isCompleted ?
+                         "Review Saved Cards" : "Start Today's Deck")
                         .font(AppTheme.Typography.meaning)
                         .fontWeight(.semibold)
                 }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, AppTheme.Spacing.md)
-                .background(AppTheme.Colors.vermillion)
+                .background(deckViewModel.isCompleted ?
+                            AppTheme.Colors.sageGreen :
+                            AppTheme.Colors.vermillion)
                 .clipShape(RoundedRectangle(
                     cornerRadius: AppTheme.Radius.button
                 ))
             }
-
+            
             Button {
             } label: {
                 HStack {
@@ -168,32 +255,6 @@ struct HomeView: View {
                     .stroke(AppTheme.Colors.border, lineWidth: 1)
                 )
             }
-        }
-    }
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: AppTheme.Spacing.xl) {
-                    headerSection
-                    streakSection
-                    todaySection
-                    Spacer()
-                    actionButtons
-                }
-                .padding(.horizontal, AppTheme.Spacing.lg)
-                .padding(.top, AppTheme.Spacing.lg)
-                .padding(.bottom, AppTheme.Spacing.xxl)
-            }
-            .background(
-                Image("HomePageBG")
-                    .resizable()
-                    .scaledToFill()
-                    .opacity(0.8)
-                    .ignoresSafeArea()
-//                    .padding(.leading)
-            )
-            .background(AppTheme.Colors.background.ignoresSafeArea())
         }
     }
 }
