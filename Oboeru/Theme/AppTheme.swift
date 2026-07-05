@@ -129,7 +129,7 @@ extension View {
                     Image("CardBG")
                         .resizable()
                         .scaledToFill()
-                        .opacity(0.25)
+                        .opacity(0.28)
                 }
             )
             .clipShape(RoundedRectangle(

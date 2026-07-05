@@ -189,8 +189,9 @@ struct HomeView: View {
                 Image("HomePageBG")
                     .resizable()
                     .scaledToFill()
-                    .opacity(0.4)
+                    .opacity(0.8)
                     .ignoresSafeArea()
+//                    .padding(.leading)
             )
             .background(AppTheme.Colors.background.ignoresSafeArea())
         }
