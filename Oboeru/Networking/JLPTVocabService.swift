@@ -33,61 +33,50 @@ enum JLPTError: LocalizedError {
 }
 
 class JLPTVocabService {
-
+    
     static let shared = JLPTVocabService()
-
+    
     private let baseURL = "https://jlpt-vocab-api.vercel.app/api/words"
-
+    
     private let session: URLSession = {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
         return URLSession(configuration: config)
     }()
-
+    
     func fetchDailyDeck(seenWords: Set<String>) async throws -> [JLPTWord] {
+        guard let url = URL(
+            string: "\(baseURL)/all?level=5"
+        ) else {
+            throw JLPTError.invalidURL
+        }
+        
+        let (data, response) = try await session.data(from: url)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw JLPTError.badResponse
+        }
+        
+        let allWords = try JSONDecoder().decode([JLPTWord].self, from: data)
+        
+        let unseen = allWords
+            .filter { !seenWords.contains($0.word) }
+            .shuffled()
+        
         var kanaWords: [JLPTWord] = []
         var kanjiWords: [JLPTWord] = []
-        var offset = Int.random(in: 0..<300)
-        var attempts = 0
-
-        while (kanaWords.count < 5 || kanjiWords.count < 5) && attempts < 10 {
-            guard let url = URL(
-                string: "\(baseURL)?level=5&offset=\(offset)&limit=50"
-            ) else { break }
-
-            let (data, response) = try await session.data(from: url)
-
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
-                throw JLPTError.badResponse
+        
+        for word in unseen {
+            if kanaWords.count < 5 && word.isKanaWord {
+                kanaWords.append(word)
+            } else if kanjiWords.count < 5 && !word.isKanaWord {
+                kanjiWords.append(word)
             }
-
-            let decoded = try JSONDecoder().decode(
-                JLPTResponse.self, from: data
-            )
-
-            let unseen = decoded.words.filter {
-                !seenWords.contains($0.word)
-            }
-
-            for word in unseen {
-                if kanaWords.count < 5 &&
-                   word.isKanaWord &&
-                   !kanaWords.contains(where: { $0.word == word.word }) {
-                    kanaWords.append(word)
-                } else if kanjiWords.count < 5 &&
-                          !word.isKanaWord &&
-                          !kanjiWords.contains(where: { $0.word == word.word }) {
-                    kanjiWords.append(word)
-                }
-                if kanaWords.count == 5 && kanjiWords.count == 5 { break }
-            }
-
-            offset += 50
-            attempts += 1
+            if kanaWords.count == 5 && kanjiWords.count == 5 { break }
         }
-
+        
         return kanaWords + kanjiWords
     }
 }

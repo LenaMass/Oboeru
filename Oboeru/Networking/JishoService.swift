@@ -34,49 +34,6 @@ class JishoService {
         return try decode(data)
     }
     
-    func fetchDailyDeck(seenSlugs: Set<String>) async throws -> [JishoWord] {
-        var kanaWords: [JishoWord] = []
-        var kanjiWords: [JishoWord] = []
-        var page = 1
-        
-        while (kanaWords.count < 5 || kanjiWords.count < 5) && page <= 5 {
-            guard let url = URL(
-                string: "\(baseURL)?keyword=%23jlpt-n5%20%23common&page=\(page)"
-            ) else { break }
-            
-            let data = try await fetchData(from: url)
-            let words = try decode(data)
-            if words.isEmpty { break }
-            
-            let unseen = words.filter { !seenSlugs.contains($0.slug) }
-            
-            for word in unseen {
-                let isKana = word.isUsuallyKana ||
-                    (isKanaOnly(word.primaryReading) &&
-                     !containsKanji(word.primaryWord))
-                
-                if kanaWords.count < 5 &&
-                   isKana &&
-                   !kanaWords.contains(where: { $0.slug == word.slug }) {
-                    kanaWords.append(word)
-                } else if kanjiWords.count < 5 &&
-                          containsKanji(word.primaryWord) &&
-                          !word.isUsuallyKana &&
-                          !kanjiWords.contains(where: {
-                              $0.slug == word.slug
-                          }) {
-                    kanjiWords.append(word)
-                }
-                
-                if kanaWords.count == 5 && kanjiWords.count == 5 { break }
-            }
-            
-            page += 1
-        }
-        
-        return kanaWords + kanjiWords
-    }
-    
     private func buildURL(for query: String,
                           isJapanese: Bool) throws -> URL {
         guard !query.isEmpty else {

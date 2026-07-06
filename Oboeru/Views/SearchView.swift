@@ -29,12 +29,12 @@ struct SearchView: View {
             
             TextField("Search in Japanese or English...",
                       text: $searchText)
-                .font(AppTheme.Typography.meaning)
-                .foregroundStyle(AppTheme.Colors.primaryText)
-                .submitLabel(.search)
-                .onSubmit {
-                    viewModel.search(query: searchText)
-                }
+            .font(AppTheme.Typography.meaning)
+            .foregroundStyle(AppTheme.Colors.primaryText)
+            .submitLabel(.search)
+            .onSubmit {
+                viewModel.search(query: searchText)
+            }
             
             if !searchText.isEmpty {
                 Button {
@@ -150,20 +150,27 @@ struct SearchView: View {
     }
     
     var resultsList: some View {
-        ScrollView {
-            LazyVStack(spacing: AppTheme.Spacing.md) {
-                ForEach(viewModel.results) { word in
-                    SearchResultCard(
-                        word: word.primaryWord,
-                        reading: word.primaryReading,
-                        meaning: word.primaryMeaning,
-                        jlptLevel: word.jlptLevel
-                    )
-                }
+        List {
+            ForEach(viewModel.results) { word in
+                SearchResultCard(
+                    word: word.primaryWord,
+                    reading: word.primaryReading,
+                    meaning: word.primaryMeaning,
+                    jlptLevel: word.jlptLevel
+                )
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(
+                    top: 5, leading: 16,
+                    bottom: 5, trailing: 16
+                ))
             }
-            .padding(.horizontal, AppTheme.Spacing.lg)
-            .padding(.vertical, AppTheme.Spacing.md)
         }
+        .listStyle(.plain)
+        .environment(
+            \.managedObjectContext,
+             PersistenceController.shared.context
+        )
     }
 }
 

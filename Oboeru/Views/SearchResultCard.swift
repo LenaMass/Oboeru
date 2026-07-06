@@ -1,10 +1,14 @@
 import SwiftUI
+import CoreData
 
 struct SearchResultCard: View {
     let word: String
     let reading: String
     let meaning: String
     let jlptLevel: String
+    
+    @State private var isSaved = false
+    @Environment(\.managedObjectContext) private var context
     
     var body: some View {
         HStack(spacing: AppTheme.Spacing.md) {
@@ -43,14 +47,67 @@ struct SearchResultCard: View {
             Spacer()
             
             Button {
+                saveCard()
             } label: {
-                Image(systemName: "plus.circle.fill")
+                Image(systemName: isSaved ?
+                      "checkmark.circle.fill" : "plus.circle.fill")
                     .font(.system(size: 28))
-                    .foregroundStyle(AppTheme.Colors.sageGreen)
+                    .foregroundStyle(isSaved ?
+                                     AppTheme.Colors.sageGreen :
+                                     AppTheme.Colors.sageGreen)
+                    .animation(AppTheme.Animation.spring, value: isSaved)
             }
+            .disabled(isSaved)
+            .buttonStyle(.plain)
         }
         .padding(AppTheme.Spacing.md)
         .oboeruCard()
+        .onAppear {
+            checkIfSaved()
+        }
+    }
+    
+    func saveCard() {
+        let request = FlashCardEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "word == %@", word)
+        
+        let existing = (try? context.fetch(request)) ?? []
+        guard existing.isEmpty else {
+            isSaved = true
+            return
+        }
+        
+        let entity = FlashCardEntity(context: context)
+        entity.id = UUID()
+        entity.word = word
+        entity.reading = reading
+        entity.meaning = meaning
+        entity.jlptLevel = jlptLevel
+        entity.exampleSentence = ""
+        entity.partOfSpeech = ""
+        entity.easeFactor = 2.5
+        entity.interval = 1
+        entity.repetitions = 0
+        entity.nextReviewDate = Date()
+        entity.lastReviewDate = nil
+        entity.isKnown = false
+        entity.createdAt = Date()
+        
+        do {
+            try context.save()
+            withAnimation(AppTheme.Animation.spring) {
+                isSaved = true
+            }
+        } catch {
+            print("Failed to save card: \(error)")
+        }
+    }
+    
+    func checkIfSaved() {
+        let request = FlashCardEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "word == %@", word)
+        let results = (try? context.fetch(request)) ?? []
+        isSaved = !results.isEmpty
     }
 }
 
@@ -60,6 +117,10 @@ struct SearchResultCard: View {
         reading: "ねこ",
         meaning: "Cat",
         jlptLevel: "N5"
+    )
+    .environment(
+        \.managedObjectContext,
+         PersistenceController.shared.context
     )
     .padding()
     .background(AppTheme.Colors.background)

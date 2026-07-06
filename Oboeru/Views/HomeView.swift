@@ -2,7 +2,11 @@ import SwiftUI
 
 struct HomeView: View {
     
+    @Binding var selectedTab: Int
     @StateObject private var deckViewModel = DailyDeckViewModel()
+    @StateObject private var libraryViewModel = LibraryViewModel()
+    @State private var showingStudy = false
+    @State private var showingLibraryStudy = false
     
     var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -47,6 +51,11 @@ struct HomeView: View {
             )
             .background(AppTheme.Colors.background.ignoresSafeArea())
             .preferredColorScheme(.light)
+            
+            .onAppear {
+                deckViewModel.loadOrGenerateDeck()
+                libraryViewModel.fetchCards()
+            }
         }
     }
     
@@ -146,7 +155,7 @@ struct HomeView: View {
                     .font(AppTheme.Typography.meaning)
                     .foregroundStyle(AppTheme.Colors.primaryText)
                 
-                Text("Fetching today's words from Jisho")
+                Text("Fetching today's words")
                     .font(AppTheme.Typography.caption)
                     .foregroundStyle(AppTheme.Colors.tertiaryText)
             }
@@ -169,9 +178,15 @@ struct HomeView: View {
                 .font(AppTheme.Typography.meaning)
                 .foregroundStyle(AppTheme.Colors.secondaryText)
             
-            Text("Come back tomorrow for 10 new words")
-                .font(AppTheme.Typography.caption)
-                .foregroundStyle(AppTheme.Colors.tertiaryText)
+            if libraryViewModel.dueCount > 0 {
+                Text("\(libraryViewModel.dueCount) saved cards due for review")
+                    .font(AppTheme.Typography.caption)
+                    .foregroundStyle(AppTheme.Colors.vermillion)
+            } else {
+                Text("Come back tomorrow for 10 new words")
+                    .font(AppTheme.Typography.caption)
+                    .foregroundStyle(AppTheme.Colors.tertiaryText)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(AppTheme.Spacing.xl)
@@ -211,6 +226,11 @@ struct HomeView: View {
     var actionButtons: some View {
         VStack(spacing: AppTheme.Spacing.md) {
             Button {
+                if deckViewModel.isCompleted {
+                    showingLibraryStudy = true
+                } else {
+                    showingStudy = true
+                }
             } label: {
                 HStack {
                     Image(systemName: "rectangle.on.rectangle")
@@ -232,6 +252,7 @@ struct HomeView: View {
             }
             
             Button {
+                selectedTab = 1
             } label: {
                 HStack {
                     Image(systemName: "magnifyingglass")
@@ -255,9 +276,22 @@ struct HomeView: View {
                 )
             }
         }
+        .sheet(isPresented: $showingStudy,
+               onDismiss: {
+            libraryViewModel.fetchCards()
+            deckViewModel.loadOrGenerateDeck()
+        }) {
+            StudyView(deck: deckViewModel.todaysDeck) {
+                deckViewModel.markDeckCompleted()
+            }
+        }
+        .sheet(isPresented: $showingLibraryStudy,
+               onDismiss: { libraryViewModel.fetchCards() }) {
+            StudyView(deck: libraryViewModel.dueCards)
+        }
     }
 }
 
 #Preview {
-    HomeView()
+    HomeView(selectedTab: .constant(0))
 }

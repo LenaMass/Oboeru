@@ -4,6 +4,10 @@ struct JishoResponse: Codable {
     let data: [JishoWord]
 }
 
+struct JLPTAllResponse: Codable {
+    let words: [JLPTWord]
+}
+
 struct JishoWord: Codable, Identifiable {
     let id = UUID()
     let slug: String

@@ -2,8 +2,21 @@ import SwiftUI
 
 struct StudyView: View {
     
+    let deck: [FlashCard]
+    var onComplete: (() -> Void)?
+    
+    @StateObject private var viewModel: StudyViewModel
     @State private var isFlipped = false
     @State private var degree: Double = 0
+    @Environment(\.dismiss) var dismiss
+    
+    init(deck: [FlashCard], onComplete: (() -> Void)? = nil) {
+        self.deck = deck
+        self.onComplete = onComplete
+        _viewModel = StateObject(
+            wrappedValue: StudyViewModel(deck: deck)
+        )
+    }
     
     var body: some View {
         NavigationStack {
@@ -11,29 +24,32 @@ struct StudyView: View {
                 AppTheme.Colors.background
                     .ignoresSafeArea()
                 
-                VStack(spacing: AppTheme.Spacing.xl) {
-                    progressBar
-                    flashCard
-                    actionButtons
+                if viewModel.isSessionComplete {
+                    completionView
+                } else {
+                    VStack(spacing: AppTheme.Spacing.xl) {
+                        progressBar
+                        flashCard
+                        actionButtons
+                    }
+                    .padding(.horizontal, AppTheme.Spacing.lg)
+                    .padding(.top, AppTheme.Spacing.lg)
                 }
-                .padding(.horizontal, AppTheme.Spacing.lg)
-                .padding(.top, AppTheme.Spacing.lg)
             }
             .navigationTitle("Study")
             .navigationBarTitleDisplayMode(.inline)
             .preferredColorScheme(.light)
-            
         }
     }
     
     var progressBar: some View {
         VStack(spacing: AppTheme.Spacing.xs) {
             HStack {
-                Text("Card 1 of 10")
+                Text("Card \(viewModel.currentIndex + 1) of \(viewModel.totalCards)")
                     .font(AppTheme.Typography.caption)
                     .foregroundStyle(AppTheme.Colors.tertiaryText)
                 Spacer()
-                Text("0 done")
+                Text("\(viewModel.currentIndex) done")
                     .font(AppTheme.Typography.caption)
                     .foregroundStyle(AppTheme.Colors.sageGreen)
             }
@@ -42,15 +58,19 @@ struct StudyView: View {
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(AppTheme.Colors.border)
-                        .frame(height: 7)
+                        .frame(height: 4)
                     
                     RoundedRectangle(cornerRadius: 4)
                         .fill(AppTheme.Colors.vermillion)
-                        .frame(width: geo.size.width * 0.1,
-                               height: 7)
+                        .frame(
+                            width: geo.size.width * viewModel.progress,
+                            height: 4
+                        )
+                        .animation(AppTheme.Animation.spring,
+                                   value: viewModel.progress)
                 }
             }
-            .frame(height: 9)
+            .frame(height: 4)
         }
     }
     
@@ -79,21 +99,28 @@ struct StudyView: View {
         VStack(spacing: AppTheme.Spacing.lg) {
             Spacer()
             
-            SealStamp(text: "N5")
-                .frame(maxWidth: .infinity, alignment: .trailing)
+            HStack {
+                Spacer()
+                if let card = viewModel.currentCard {
+                    SealStamp(text: card.jlptLevel)
+                }
+            }
             
             Spacer()
             
-            Text("猫")
+            Text(viewModel.currentCard?.word ?? "")
                 .font(AppTheme.Typography.kanjiDisplay)
                 .foregroundStyle(AppTheme.Colors.primaryText)
+                .minimumScaleFactor(0.5)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
             
             Spacer()
             
             Text("tap to reveal")
                 .font(AppTheme.Typography.cardHint)
-                .foregroundStyle(AppTheme.Colors.vermillion)
-                .padding(.bottom, AppTheme.Spacing.lg)
+                .foregroundStyle(AppTheme.Colors.tertiaryText)
+                .padding(.bottom, AppTheme.Spacing.md)
         }
         .frame(maxWidth: .infinity, maxHeight: 400)
         .padding(AppTheme.Spacing.lg)
@@ -104,11 +131,14 @@ struct StudyView: View {
         VStack(spacing: AppTheme.Spacing.lg) {
             Spacer()
             
-            Text("猫")
+            Text(viewModel.currentCard?.word ?? "")
                 .font(.system(size: 48, weight: .bold, design: .serif))
                 .foregroundStyle(AppTheme.Colors.primaryText)
+                .minimumScaleFactor(0.5)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
             
-            Text("ねこ")
+            Text(viewModel.currentCard?.reading ?? "")
                 .font(AppTheme.Typography.kanaReading)
                 .foregroundStyle(AppTheme.Colors.secondaryText)
             
@@ -117,14 +147,12 @@ struct StudyView: View {
                 .frame(height: 0.5)
                 .padding(.horizontal, AppTheme.Spacing.xl)
             
-            Text("Cat")
+            Text(viewModel.currentCard?.meaning ?? "")
                 .font(AppTheme.Typography.meaning)
                 .foregroundStyle(AppTheme.Colors.primaryText)
                 .fontWeight(.medium)
-            
-            Text("A small domesticated carnivorous mammal")
-                .font(AppTheme.Typography.example)
-                .foregroundStyle(AppTheme.Colors.secondaryText)
+                .minimumScaleFactor(0.7)
+                .lineLimit(3)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppTheme.Spacing.lg)
             
@@ -138,6 +166,8 @@ struct StudyView: View {
     var actionButtons: some View {
         HStack(spacing: AppTheme.Spacing.lg) {
             Button {
+                viewModel.markForgot()
+                resetCard()
             } label: {
                 VStack(spacing: AppTheme.Spacing.xs) {
                     Image(systemName: "xmark.circle.fill")
@@ -162,6 +192,8 @@ struct StudyView: View {
             Spacer()
             
             Button {
+                viewModel.markKnown()
+                resetCard()
             } label: {
                 VStack(spacing: AppTheme.Spacing.xs) {
                     Image(systemName: "checkmark.circle.fill")
@@ -178,10 +210,48 @@ struct StudyView: View {
         .animation(AppTheme.Animation.quick, value: isFlipped)
     }
     
+    var completionView: some View {
+        VStack(spacing: AppTheme.Spacing.xl) {
+            Spacer()
+            
+            Text("完了")
+                .font(.system(size: 72, weight: .bold, design: .serif))
+                .foregroundStyle(AppTheme.Colors.vermillion)
+            
+            Text("Session Complete")
+                .font(AppTheme.Typography.kanaReading)
+                .foregroundStyle(AppTheme.Colors.primaryText)
+            
+            Text("You studied \(viewModel.totalCards) cards")
+                .font(AppTheme.Typography.meaning)
+                .foregroundStyle(AppTheme.Colors.secondaryText)
+            
+            Spacer()
+            
+            Button {
+                onComplete?()
+                dismiss()
+            } label: {
+                Text("Back to Home")
+                    .font(AppTheme.Typography.meaning)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppTheme.Spacing.md)
+                    .background(AppTheme.Colors.vermillion)
+                    .clipShape(RoundedRectangle(
+                        cornerRadius: AppTheme.Radius.button
+                    ))
+            }
+            .padding(.horizontal, AppTheme.Spacing.lg)
+            .padding(.bottom, AppTheme.Spacing.xxl)
+        }
+    }
+    
     func flipCard() {
         withAnimation(AppTheme.Animation.cardFlip) {
-            degree += 180
             isFlipped.toggle()
+            degree = isFlipped ? 180 : 0
         }
     }
     
@@ -194,5 +264,8 @@ struct StudyView: View {
 }
 
 #Preview {
-    StudyView()
+    StudyView(deck: [
+        FlashCard(word: "猫", reading: "ねこ",
+                  meaning: "Cat", jlptLevel: "N5")
+    ])
 }
