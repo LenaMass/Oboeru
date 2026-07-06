@@ -3,6 +3,7 @@
     <entity name="DailyDeckEntity" representedClassName="DailyDeckEntity" syncable="YES">
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="isCompleted" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="wordsJSON" optional="YES" attributeType="String"/>
         <attribute name="wordSlugs" optional="YES" attributeType="String"/>
     </entity>
     <entity name="FlashCardEntity" representedClassName="FlashCardEntity" syncable="YES">

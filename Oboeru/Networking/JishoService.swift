@@ -15,9 +15,17 @@ enum JishoError: LocalizedError {
 }
 
 class JishoService {
+    
     static let shared = JishoService()
     
     private let baseURL = "https://jisho.org/api/v1/search/words"
+    
+    private let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 60
+        return URLSession(configuration: config)
+    }()
     
     func search(query: String) async throws -> [JishoWord] {
         let isJapanese = containsJapanese(query)
@@ -25,14 +33,50 @@ class JishoService {
         let data = try await fetchData(from: url)
         return try decode(data)
     }
-
-    private func containsJapanese(_ text: String) -> Bool {
-        text.unicodeScalars.contains { scalar in
-            (0x3040...0x309F).contains(scalar.value) ||
-            (0x30A0...0x30FF).contains(scalar.value) ||
-            (0x4E00...0x9FFF).contains(scalar.value)
+    
+    func fetchDailyDeck(seenSlugs: Set<String>) async throws -> [JishoWord] {
+        var kanaWords: [JishoWord] = []
+        var kanjiWords: [JishoWord] = []
+        var page = 1
+        
+        while (kanaWords.count < 5 || kanjiWords.count < 5) && page <= 5 {
+            guard let url = URL(
+                string: "\(baseURL)?keyword=%23jlpt-n5%20%23common&page=\(page)"
+            ) else { break }
+            
+            let data = try await fetchData(from: url)
+            let words = try decode(data)
+            if words.isEmpty { break }
+            
+            let unseen = words.filter { !seenSlugs.contains($0.slug) }
+            
+            for word in unseen {
+                let isKana = word.isUsuallyKana ||
+                    (isKanaOnly(word.primaryReading) &&
+                     !containsKanji(word.primaryWord))
+                
+                if kanaWords.count < 5 &&
+                   isKana &&
+                   !kanaWords.contains(where: { $0.slug == word.slug }) {
+                    kanaWords.append(word)
+                } else if kanjiWords.count < 5 &&
+                          containsKanji(word.primaryWord) &&
+                          !word.isUsuallyKana &&
+                          !kanjiWords.contains(where: {
+                              $0.slug == word.slug
+                          }) {
+                    kanjiWords.append(word)
+                }
+                
+                if kanaWords.count == 5 && kanjiWords.count == 5 { break }
+            }
+            
+            page += 1
         }
+        
+        return kanaWords + kanjiWords
     }
+    
     private func buildURL(for query: String,
                           isJapanese: Bool) throws -> URL {
         guard !query.isEmpty else {
@@ -54,70 +98,34 @@ class JishoService {
         }
         
         return url
-   
     }
-    func fetchDailyKanaWords(page: Int = 1) async throws -> [JishoWord] {
-        let query = "%23jlpt-n5%20%23common"
-        guard let url = URL(
-            string: "\(baseURL)?keyword=\(query)&page=\(page)"
-        ) else {
-            throw JishoError.invalidURL
+    
+    private func fetchData(from url: URL) async throws -> Data {
+        let (data, response) = try await session.data(from: url)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw JishoError.badResponse
         }
         
-        let data = try await fetchData(from: url)
-        let words = try decode(data)
-        
-        return words.filter { word in
-            let primaryWord = word.primaryWord
-            let reading = word.primaryReading
-            return (isKanaOnly(primaryWord) || isKanaOnly(reading))
-                && !primaryWord.isEmpty
-                && !containsKanji(primaryWord)
-        }
+        return data
     }
-
-    func fetchDailyKanjiWords(page: Int = 1) async throws -> [JishoWord] {
-        let query = "%23jlpt-n5%20%23common"
-        guard let url = URL(
-            string: "\(baseURL)?keyword=\(query)&page=\(page)"
-        ) else {
-            throw JishoError.invalidURL
-        }
-        
-        let data = try await fetchData(from: url)
-        let words = try decode(data)
-        
-        return words.filter { word in
-            let primaryWord = word.primaryWord
-            return containsKanji(primaryWord) && !primaryWord.isEmpty
+    
+    private func decode(_ data: Data) throws -> [JishoWord] {
+        let decoded = try JSONDecoder().decode(
+            JishoResponse.self, from: data
+        )
+        return decoded.data
+    }
+    
+    private func containsJapanese(_ text: String) -> Bool {
+        text.unicodeScalars.contains { scalar in
+            (0x3040...0x309F).contains(scalar.value) ||
+            (0x30A0...0x30FF).contains(scalar.value) ||
+            (0x4E00...0x9FFF).contains(scalar.value)
         }
     }
-
-    func fetchDailyDeck(seenSlugs: Set<String>) async throws -> [JishoWord] {
-        var kanaWords: [JishoWord] = []
-        var kanjiWords: [JishoWord] = []
-        var page = 1
-        
-        while kanaWords.count < 5 || kanjiWords.count < 5 {
-            if kanaWords.count < 5 {
-                let fetched = try await fetchDailyKanaWords(page: page)
-                let unseen = fetched.filter { !seenSlugs.contains($0.slug) }
-                kanaWords.append(contentsOf: unseen.prefix(5 - kanaWords.count))
-            }
-            
-            if kanjiWords.count < 5 {
-                let fetched = try await fetchDailyKanjiWords(page: page)
-                let unseen = fetched.filter { !seenSlugs.contains($0.slug) }
-                kanjiWords.append(contentsOf: unseen.prefix(5 - kanjiWords.count))
-            }
-            
-            page += 1
-            if page > 10 { break }
-        }
-        
-        return Array((kanaWords + kanjiWords).prefix(10))
-    }
-
+    
     private func isKanaOnly(_ text: String) -> Bool {
         guard !text.isEmpty else { return false }
         return text.unicodeScalars.allSatisfy { scalar in
@@ -125,24 +133,10 @@ class JishoService {
             (0x30A0...0x30FF).contains(scalar.value)
         }
     }
-
+    
     private func containsKanji(_ text: String) -> Bool {
         text.unicodeScalars.contains { scalar in
             (0x4E00...0x9FFF).contains(scalar.value)
         }
     }
-    }
-private func fetchData(from url:URL) async throws -> Data {
-    let (data, response) = try await URLSession.shared.data (from:url)
-    
-    guard let httpResponse = response as? HTTPURLResponse,
-          httpResponse.statusCode == 200 else {
-        throw JishoError.badResponse
-    }
-    return data
 }
-private func decode(_ data: Data) throws -> [JishoWord] {
-        let decoded = try JSONDecoder().decode(JishoResponse.self, from: data)
-        return decoded.data
-    }
-

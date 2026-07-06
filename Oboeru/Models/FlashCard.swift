@@ -47,3 +47,21 @@ struct FlashCard: Identifiable, Codable {
             nextReviewDate <= Date()
         }
     }
+extension FlashCard {
+    init(jlptWord: JLPTWord) {
+        self.id = UUID()
+        self.word = jlptWord.word
+        self.reading = jlptWord.reading
+        self.meaning = jlptWord.meaning
+        self.exampleSentence = ""
+        self.jlptLevel = "N\(jlptWord.level)"
+        self.partOfSpeech = ""
+        self.easeFactor = 2.5
+        self.interval = 1
+        self.repetitions = 0
+        self.nextReviewDate = Date()
+        self.lastReviewDate = nil
+        self.isKnown = false
+        self.createdAt = Date()
+    }
+}

@@ -46,6 +46,7 @@ struct HomeView: View {
                     .ignoresSafeArea()
             )
             .background(AppTheme.Colors.background.ignoresSafeArea())
+            .preferredColorScheme(.light)
         }
     }
     
@@ -107,20 +108,18 @@ struct HomeView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(AppTheme.Colors.primaryText)
                     
-                    Text("5 vocabulary · 5 kanji words")
+                    Text("\(deckViewModel.kanaCount) kana · \(deckViewModel.kanjiCount) kanji")
                         .font(AppTheme.Typography.caption)
                         .foregroundStyle(AppTheme.Colors.tertiaryText)
                 }
                 
                 Spacer()
                 
-                VStack(spacing: 2) {
-                    Text("続")
-                        .font(.system(size: 32,
-                                     weight: .bold,
-                                     design: .serif))
-                        .foregroundStyle(AppTheme.Colors.vermillion)
-                }
+                Text("続")
+                    .font(.system(size: 32,
+                                 weight: .bold,
+                                 design: .serif))
+                    .foregroundStyle(AppTheme.Colors.vermillion)
             }
             
             HStack(spacing: AppTheme.Spacing.sm) {

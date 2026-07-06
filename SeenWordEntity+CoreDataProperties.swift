@@ -11,8 +11,8 @@ extension SeenWordEntity {
         return NSFetchRequest<SeenWordEntity>(entityName: "SeenWordEntity")
     }
 
-    @NSManaged public var slug: String?
     @NSManaged public var seenAt: Date?
+    @NSManaged public var slug: String?
 
 }
 

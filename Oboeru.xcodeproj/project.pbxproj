@@ -6,13 +6,41 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BFE755052FFB40F7009732B1 /* SeenWordEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE755042FFB40F7009732B1 /* SeenWordEntity+CoreDataProperties.swift */; };
+		BFE755062FFB40F7009732B1 /* DailyDeckEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE755002FFB40F7009732B1 /* DailyDeckEntity+CoreDataProperties.swift */; };
+		BFE755072FFB40F7009732B1 /* FlashCardEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE755012FFB40F7009732B1 /* FlashCardEntity+CoreDataClass.swift */; };
+		BFE755082FFB40F7009732B1 /* FlashCardEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE755022FFB40F7009732B1 /* FlashCardEntity+CoreDataProperties.swift */; };
+		BFE755092FFB40F7009732B1 /* SeenWordEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE755032FFB40F7009732B1 /* SeenWordEntity+CoreDataClass.swift */; };
+		BFE7550B2FFB4150009732B1 /* DailyDeckEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE7550A2FFB4150009732B1 /* DailyDeckEntity+CoreDataClass.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		BFB821042FF9A2CF00B662D9 /* Oboeru.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Oboeru.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFE755002FFB40F7009732B1 /* DailyDeckEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DailyDeckEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		BFE755012FFB40F7009732B1 /* FlashCardEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FlashCardEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
+		BFE755022FFB40F7009732B1 /* FlashCardEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FlashCardEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		BFE755032FFB40F7009732B1 /* SeenWordEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SeenWordEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
+		BFE755042FFB40F7009732B1 /* SeenWordEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SeenWordEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		BFE7550A2FFB4150009732B1 /* DailyDeckEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DailyDeckEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		BFE754FF2FFB40AD009732B1 /* Exceptions for "Oboeru" folder in "Compile Sources" phase from "Oboeru" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = BFB821002FF9A2CF00B662D9 /* Sources */;
+			membershipExceptions = (
+				Assets.xcassets,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BFB821062FF9A2CF00B662D9 /* Oboeru */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BFE754FF2FFB40AD009732B1 /* Exceptions for "Oboeru" folder in "Compile Sources" phase from "Oboeru" target */,
+			);
 			path = Oboeru;
 			sourceTree = "<group>";
 		};
@@ -32,6 +60,12 @@
 		BFB820FB2FF9A2CF00B662D9 = {
 			isa = PBXGroup;
 			children = (
+				BFE755002FFB40F7009732B1 /* DailyDeckEntity+CoreDataProperties.swift */,
+				BFE755012FFB40F7009732B1 /* FlashCardEntity+CoreDataClass.swift */,
+				BFE755022FFB40F7009732B1 /* FlashCardEntity+CoreDataProperties.swift */,
+				BFE755032FFB40F7009732B1 /* SeenWordEntity+CoreDataClass.swift */,
+				BFE7550A2FFB4150009732B1 /* DailyDeckEntity+CoreDataClass.swift */,
+				BFE755042FFB40F7009732B1 /* SeenWordEntity+CoreDataProperties.swift */,
 				BFB821062FF9A2CF00B662D9 /* Oboeru */,
 				BFB821052FF9A2CF00B662D9 /* Products */,
 			);
@@ -119,6 +153,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFE755052FFB40F7009732B1 /* SeenWordEntity+CoreDataProperties.swift in Sources */,
+				BFE755062FFB40F7009732B1 /* DailyDeckEntity+CoreDataProperties.swift in Sources */,
+				BFE755072FFB40F7009732B1 /* FlashCardEntity+CoreDataClass.swift in Sources */,
+				BFE755082FFB40F7009732B1 /* FlashCardEntity+CoreDataProperties.swift in Sources */,
+				BFE755092FFB40F7009732B1 /* SeenWordEntity+CoreDataClass.swift in Sources */,
+				BFE7550B2FFB4150009732B1 /* DailyDeckEntity+CoreDataClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

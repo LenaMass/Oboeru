@@ -1,5 +1,4 @@
 
-
 public import Foundation
 public import CoreData
 

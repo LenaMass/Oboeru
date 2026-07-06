@@ -1,5 +1,4 @@
 
-
 public import Foundation
 public import CoreData
 
@@ -13,8 +12,9 @@ extension DailyDeckEntity {
     }
 
     @NSManaged public var date: Date?
-    @NSManaged public var wordSlugs: String?
     @NSManaged public var isCompleted: Bool
+    @NSManaged public var wordsJSON: String?
+    @NSManaged public var wordSlugs: String?
 
 }
 

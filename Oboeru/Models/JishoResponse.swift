@@ -31,6 +31,13 @@ struct JishoWord: Codable, Identifiable {
         jlpt.first ?? ""
     }
     
+    var isUsuallyKana: Bool {
+        senses.first?.tags.contains("Usually written using kana alone") ?? false
+        || senses.first?.partsOfSpeech.contains(
+            "Usually written using kana alone"
+        ) ?? false
+    }
+    
     enum CodingKeys: String, CodingKey {
         case slug
         case jlpt
@@ -47,9 +54,11 @@ struct JishoJapanese: Codable {
 struct JishoSense: Codable {
     let englishDefinitions: [String]
     let partsOfSpeech: [String]
+    let tags: [String]
     
     enum CodingKeys: String, CodingKey {
         case englishDefinitions = "english_definitions"
         case partsOfSpeech = "parts_of_speech"
+        case tags
     }
 }
