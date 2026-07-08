@@ -264,8 +264,5 @@ struct StudyView: View {
 }
 
 #Preview {
-    StudyView(deck: [
-        FlashCard(word: "猫", reading: "ねこ",
-                  meaning: "Cat", jlptLevel: "N5")
-    ])
+    StudyTabView(libraryViewModel: LibraryViewModel())
 }

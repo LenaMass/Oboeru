@@ -3,8 +3,8 @@ import SwiftUI
 struct HomeView: View {
     
     @Binding var selectedTab: Int
-    @StateObject private var deckViewModel = DailyDeckViewModel()
-    @StateObject private var libraryViewModel = LibraryViewModel()
+    @ObservedObject var deckViewModel: DailyDeckViewModel
+    @ObservedObject var libraryViewModel: LibraryViewModel
     @State private var showingStudy = false
     @State private var showingLibraryStudy = false
     
@@ -51,7 +51,6 @@ struct HomeView: View {
             )
             .background(AppTheme.Colors.background.ignoresSafeArea())
             .preferredColorScheme(.light)
-            
             .onAppear {
                 deckViewModel.loadOrGenerateDeck()
                 libraryViewModel.fetchCards()
@@ -278,8 +277,8 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showingStudy,
                onDismiss: {
+            deckViewModel.markDeckCompleted()
             libraryViewModel.fetchCards()
-            deckViewModel.loadOrGenerateDeck()
         }) {
             StudyView(deck: deckViewModel.todaysDeck) {
                 deckViewModel.markDeckCompleted()
@@ -293,5 +292,9 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView(selectedTab: .constant(0))
+    HomeView(
+        selectedTab: .constant(0),
+        deckViewModel: DailyDeckViewModel(),
+        libraryViewModel: LibraryViewModel()
+    )
 }

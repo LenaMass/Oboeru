@@ -3,8 +3,14 @@ import SwiftUI
 struct MainTabView: View {
     
     @State private var selectedTab = 0
+    @ObservedObject var deckViewModel: DailyDeckViewModel
+    @ObservedObject var libraryViewModel: LibraryViewModel
     
-    init() {
+    init(deckViewModel: DailyDeckViewModel,
+         libraryViewModel: LibraryViewModel) {
+        self.deckViewModel = deckViewModel
+        self.libraryViewModel = libraryViewModel
+        
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(
@@ -16,11 +22,15 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView(selectedTab: $selectedTab)
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(0)
+            HomeView(
+                selectedTab: $selectedTab,
+                deckViewModel: deckViewModel,
+                libraryViewModel: libraryViewModel
+            )
+            .tabItem {
+                Label("Home", systemImage: "house.fill")
+            }
+            .tag(0)
             
             SearchView()
                 .tabItem {
@@ -28,13 +38,13 @@ struct MainTabView: View {
                 }
                 .tag(1)
             
-            StudyTabView()
+            StudyTabView(libraryViewModel: libraryViewModel)
                 .tabItem {
                     Label("Study", systemImage: "rectangle.on.rectangle.fill")
                 }
                 .tag(2)
             
-            LibraryView()
+            LibraryView(viewModel: libraryViewModel)
                 .tabItem {
                     Label("Library", systemImage: "books.vertical.fill")
                 }
@@ -45,5 +55,8 @@ struct MainTabView: View {
 }
 
 #Preview {
-    MainTabView()
+    MainTabView(
+        deckViewModel: DailyDeckViewModel(),
+        libraryViewModel: LibraryViewModel()
+    )
 }

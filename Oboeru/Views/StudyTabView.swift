@@ -2,7 +2,7 @@ import SwiftUI
 
 struct StudyTabView: View {
     
-    @StateObject private var libraryViewModel = LibraryViewModel()
+    @ObservedObject var libraryViewModel: LibraryViewModel
     @State private var showingStudy = false
     
     var body: some View {
@@ -74,5 +74,5 @@ struct StudyTabView: View {
 }
 
 #Preview {
-    StudyTabView()
+    StudyTabView(libraryViewModel: LibraryViewModel())
 }

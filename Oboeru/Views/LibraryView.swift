@@ -3,7 +3,7 @@ import CoreData
 
 struct LibraryView: View {
     
-    @StateObject private var viewModel = LibraryViewModel()
+    @ObservedObject var viewModel: LibraryViewModel
     @State private var selectedFilter: CardFilter = .all
     
     enum CardFilter: String, CaseIterable {
@@ -57,7 +57,6 @@ struct LibraryView: View {
                             .fontWeight(
                                 selectedFilter == filter ? .semibold : .regular
                             )
-                        
                         Text("\(countFor(filter))")
                             .font(.system(size: 10))
                     }
@@ -68,8 +67,7 @@ struct LibraryView: View {
                     .padding(.vertical, AppTheme.Spacing.sm)
                     .background(
                         selectedFilter == filter ?
-                        AppTheme.Colors.cardSurface :
-                        Color.clear
+                        AppTheme.Colors.cardSurface : Color.clear
                     )
                     .clipShape(RoundedRectangle(
                         cornerRadius: AppTheme.Radius.badge
@@ -152,16 +150,14 @@ struct LibraryView: View {
     
     func daysUntilReview(_ card: FlashCard) -> Int {
         let days = Calendar.current.dateComponents(
-            [.day],
-            from: Date(),
-            to: card.nextReviewDate
+            [.day], from: Date(), to: card.nextReviewDate
         ).day ?? 0
         return max(0, days)
     }
 }
 
 #Preview {
-    LibraryView()
+    LibraryView(viewModel: LibraryViewModel())
         .environment(
             \.managedObjectContext,
              PersistenceController.shared.context

@@ -27,7 +27,6 @@ class DailyDeckViewModel: ObservableObject {
     func loadOrGenerateDeck() {
         if let existing = fetchTodaysDeck() {
             isCompleted = existing.isCompleted
-            
             if let jsonString = existing.wordsJSON,
                let jsonData = jsonString.data(using: .utf8),
                let cards = try? JSONDecoder().decode(
@@ -41,6 +40,11 @@ class DailyDeckViewModel: ObservableObject {
     }
     
     func generateNewDeck() {
+        guard fetchTodaysDeck() == nil else {
+            loadOrGenerateDeck()
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
@@ -71,7 +75,6 @@ class DailyDeckViewModel: ObservableObject {
         guard let deck = fetchTodaysDeck() else { return }
         deck.isCompleted = true
         PersistenceController.shared.save()
-        
         DispatchQueue.main.async {
             self.isCompleted = true
         }
@@ -100,6 +103,8 @@ class DailyDeckViewModel: ObservableObject {
     
     private func saveDailyDeck(cards: [FlashCard],
                                 words: [JLPTWord]) {
+        guard fetchTodaysDeck() == nil else { return }
+        
         let deck = DailyDeckEntity(context: context)
         deck.date = Calendar.current.startOfDay(for: Date())
         deck.wordSlugs = words.map { $0.word }.joined(separator: ",")

@@ -4,12 +4,17 @@ import SwiftUI
 struct OboeeruApp: App {
     
     let persistence = PersistenceController.shared
+    @StateObject private var deckViewModel = DailyDeckViewModel()
+    @StateObject private var libraryViewModel = LibraryViewModel()
     
     var body: some Scene {
         WindowGroup {
-            MainTabView()
-                .environment(\.managedObjectContext,
-                              persistence.context)
+            MainTabView(
+                deckViewModel: deckViewModel,
+                libraryViewModel: libraryViewModel
+            )
+            .environment(\.managedObjectContext,
+                          persistence.context)
         }
     }
 }
