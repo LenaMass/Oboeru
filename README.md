@@ -85,6 +85,5 @@ New words appear every day for 5 consecutive days to build a strong initial memo
 </div>
 
 
-<p>No API keys needed. No package dependencies. No setup.</p>
 
-<p>The app connects to the Jisho and JLPT Vocab public APIs automatically on first launch.</p>
+<!-- <p>The app connects to the Jisho and JLPT Vocab public APIs automatically on first launch.</p> -->
