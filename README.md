@@ -5,8 +5,7 @@
 
 <h3>
 A Japanese vocabulary learning app built for real consistency.
-10 fresh N5 words every day. Spaced repetition that actually works.
-A design you'll want to open.
+10 fresh N5 words every day. Spaced repetition for a continuous habit building. 
 </h3>
 
 <p><em>覚える (oboeru) — to remember, to memorize</em></p>
