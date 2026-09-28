@@ -61,23 +61,19 @@ New words appear every day for 5 consecutive days to build a strong initial memo
 <table>
 <tr>
 <td align="center">
-<img width="220" height="476" alt="Home" src="YOUR_SCREENSHOT_URL" />
-<br><br>
+<img width="220" height="476" alt="Simulator Screenshot - iPhone 17 - 2026-09-28 at 13 57 13" src="https://github.com/user-attachments/assets/062ee76d-3ed3-44d3-b97c-2d1cb23b4dfd" /><br><br>
 <b>Home</b>
 </td>
 <td align="center">
-<img width="220" height="476" alt="Study" src="YOUR_SCREENSHOT_URL" />
-<br><br>
+<img width="220" height="476" alt="Simulator Screenshot - iPhone 17 - 2026-09-28 at 13 57 56" src="https://github.com/user-attachments/assets/e3c222b6-1422-410c-acbe-ed2aeeccf573" /><br><br>
 <b>Study</b>
 </td>
 <td align="center">
-<img width="220" height="476" alt="Search" src="YOUR_SCREENSHOT_URL" />
-<br><br>
+<img width="220" height="476" alt="Simulator Screenshot - iPhone 17 - 2026-09-28 at 13 57 48" src="https://github.com/user-attachments/assets/c9d86deb-f556-4a8b-9e5d-d4f2e6f88f14" /><br><br>
 <b>Search</b>
 </td>
 <td align="center">
-<img width="220" height="476" alt="Library" src="YOUR_SCREENSHOT_URL" />
-<br><br>
+<img width="220" height="476" alt="Simulator Screenshot - iPhone 17 - 2026-09-28 at 13 58 04" src="https://github.com/user-attachments/assets/9d555e7f-90e3-4744-aca4-1ffecd96f2db" /><br><br>
 <b>Library</b>
 </td>
 </tr>
